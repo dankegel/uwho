@@ -1,0 +1,34 @@
+uwho is a simple tool for accessing the many whois servers
+on the Internet.  It lets you look for somebody's e-mail address
+without knowing the details of where such information is kept.
+A large part of its power comes from its ability to download an
+up-to-date list of whois and ph servers. 
+
+To search for a person at a given organization, one types
+	uwho person@org
+This searches all whois servers matching the given organization name, 
+for information about the given person.  Partial or abbreviated organization 
+names, and/or country names, can also be given, e.g.
+	uwho person @ mit c=us
+searches for the given person at all organizations in the US with 'mit' in
+their name.
+
+All network access is done in parallel, and completes in about ten seconds.
+
+It is intended for use on any Unix, VMS, MS-DOS, or Windows NT system, but 
+has only been tested with SunOS 4.1.1, NeXT 2.0, HP/UX, and VMS.
+It is written to be very portable; uwho.c can easily be incorporated into 
+other programs, e.g. X Window or Mac programs, or even whois servers. 
+It isn't yet really polished.
+
+It can also act as a whois or finger server, to allow people without
+direct access to the uwho program to nevertheless use its capabilities
+by accessing a server running uwho.  Furthermore, its search engine
+has a well defined interface, and can be called from within other C programs,
+for example, real whois servers.
+
+Authors: Nye Liu (nyet@cco.caltech.edu), Dan Kegel (dank@alumni.caltech.edu)
+Legal status: This software is in the public domain.
+
+%W% %G%
+- Dan Kegel (dank@alumni.caltech.edu)

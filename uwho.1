@@ -1,0 +1,246 @@
+.\" @(#)uwho.1	2.2 11/17/92
+.TH UWHO 1 "11/17/92"
+.SH NAME
+\fIuwho\fR \- look up e-mail addresses by name and organization or country
+.SH SYNOPSIS
+.B uwho
+[
+.I -options
+]
+.IR name
+[
+.BI @ " org"
+]
+[
+.B ,
+.IR name
+[
+.BI @ " org"
+]
+]
+.B \&.\|.\|.
+.LP
+.B uwho
+[
+.I -options
+]
+.B \-help |
+.B \-list |
+.B \-update whois-server ph-server
+.SH DESCRIPTION
+\fIuwho\fR lets you look up somebody's e-mail address without knowing the 
+details of where such information is kept.  It keeps a list of the many 
+whois, ph and kis servers on the Internet, and when you look up somebody's
+address, it looks it up on all the servers whose
+organization name matches the approximate organization name you specified.
+.LP
+On the commandline, uwho expects the person's name, followed by '@',
+followed by the name of the organization where they have e-mail.
+Spaces are allowed anywhere in a name or around '@'.
+The person's last name or last and first names, and any part or parts of 
+the organization's name or domain name, can be used as search keys.
+To search for, say, Smithers at the Massachusetts Institue of Technology, 
+you could type 
+.LP
+	example% uwho smithers@mit
+.LP
+or
+.LP
+	example% uwho smithers@massa tech
+.LP
+If no organization is specified, the default host (set by -h) is searched.
+.LP
+To specify both first and last names, give the last name first, followed
+by a comma, and then the first name.  Note that no space is allowed before
+this comma, and a space afterwards is optional.  For example,
+.LP
+	example% uwho smithers, john @ mit
+.LP
+To search by country, use an organization of c=xx, where xx is the
+two-letter ISO code for the country.  (Use the -list option to see examples
+of these codes.)  You can combine country codes with organization names;
+for example,
+.LP
+	example% uwho smithers, john @ tech C=US
+.LP
+You can search for several names at the same time by separating them with 
+space separated commas " , ".  This can be useful if you're unsure of the
+spelling of a name; e.g.
+.LP
+	example% uwho smithers, john@mit , smythers, john@mit
+.LP
+If no search string is given, and none of the "\-list", "\-update", or
+"\-help" options are specified,
+\fIuwho\fR will enter interactive mode, and prompt the user for the search
+string.
+.SH USER OPTIONS
+.TP 16
+.B \-help
+Brief information about \fIuwho\fR
+.TP
+.B \-p
+Enable output pager if supported (see also ENVIRONMENT)
+.TP
+.BI \-t " timeout"
+Set the timeout for network reads (0 for none).
+Overrides the default value of 15 seconds.
+Use -t 30 or so if servers seem to always truncate their answers.
+.TP
+.B \-verbose
+Print extra info about the progress of the query, such as the exact
+string sent to the remote server.
+.TP
+.B \-list
+List the directory servers known by \fIuwho\fR
+.LP
+.SH ADMINISTRATION OPTIONS
+.TP
+.B \-literal
+Do not process the outgoing query in any way.  Used mainly for debugging.
+.TP
+.BI \-h " host prot"
+Set the host and protocol used when no organization is specified
+(i.e. this should point to your local directory server).
+Overrides the default values specified during compilation.
+.TP
+.BI \-dir " directory"
+Set the data directory where \fIuwho\fR's server lists are stored
+Overrides the default value specified during compilation.
+.TP
+.B \-update whois-server ph-server
+Update the server lists with information from the given uwho and ph list servers;
+uses the queries 'whois-servers' and 'ns-servers', respectively.
+Should be run roughly monthly.
+.TP
+.B \-whoisd
+If no query is entered on the commandline, uwho always enters an interactive
+mode.  Normally, the interactive mode prompts the user to enter queries, and
+treats each line as a command or a query.
+If
+.B \-whoisd 
+is specified, the interactive mode does not prompt, and only reads one line;
+also, output lines are terminated with CR LF.
+.LP
+.SH EXAMPLES
+.LP
+You should begin by searching for person by first and last name, and
+back off to last name only if your first search does not find the person.
+Some hosts do not understand it when you give first and last names.  For
+example, if the search
+.LP
+	example% uwho Kegel, Daniel@caltech
+.LP
+comes up empty, try the search
+.LP
+	example% uwho Kegel@caltech 
+.LP
+Most hosts have a help file that tells you more about how you can
+search for names or report problems, e.g.
+.LP
+	example% uwho help@stanford
+.br
+or
+.br
+	example% uwho '?'@ddn
+.LP
+Note the quotes around the question mark; you need these to
+keep the shell from treating the question mark as a wildcard.
+.LP
+.SH OUTPUT FORMAT
+\fIuwho\fR prints the message
+.LP
+n queries pending...
+.LP
+while it sends your query to the selected servers; it then prints
+a banner before showing each server's response to
+your query. The banner indicates the host name of the organization being
+queried and a short description of the organization. For instance,
+.LP
+	example% uwho help@stanford
+.LP
+produces
+.LP
+.nf
+Opening 1 socket(s).
+------ stanford.edu Stanford University ------
+
+                      Stanford University Whois Service
+"whois help" for general info        | Problems to "whois-problem@networking"
+"whois update" for entry update info | Comments to "help@networking"
+ [ Note: Stanford does NOT provide central electronic mail service. ]
+ [       Whois "HANDLES" are NOT ELECTRONIC MAIL addresses.         ]
+ [       If no e-mail address is listed, try the telephone.         ]
+ [       DO NOT send mail to "user@stanford.edu".                   ]
+
+                                                 L&IR/Networking Systems
+                                                 Stanford University
+.fi 
+etc.
+.SH DIAGNOSTICS
+If no organizations, or too many organizations, are found, \fIuwho\fR
+complains and asks for a more detailed organization name.
+.LP
+If a requested server does not respond withing the time out duration,
+\fIuwho\fR gives up on it, and a message to that effect is printed.
+.SH ENVIRONMENT
+If the environment variable UWHO_OPTS exists, its contents are treated
+as if they were typed on the uwho command line. e.g. if UWHO_OPTS contained
+"\-dir mydir/etc \-t 5",
+.LP
+	example% uwho joe@foo
+.LP
+would be equivalent to
+.LP
+	example% uwho \-dir mydir/etc \-t 5 joe@foo
+.LP
+On systems supporting popen(3S), if the environment variable PAGER exists,
+it is used as the name of the pager to invoke when the -p option is given.  
+The default value is "more".
+.SH WHOIS SERVER CAPABILITY
+.LP
+Although uwho is portable, it is often impractical to port it to all
+environments and distribute it to all users.  Therefore,
+uwho can itself act as a whois or finger server.  Rather than accessing an 
+internal database, it forwards all queries to real whois (or ph, or kis) servers.
+This lets anyone with a whois or finger program access uwho.
+The INSTALL document describes how to do this; basically, you have to
+add a line to /etc/inetd.conf which invokes uwho -whoisd.
+.SH C-CALLABLE INTERFACE
+.LP
+Uwho is written in plain vanilla C, and uses Berkeley Sockets for its
+network interface.  The search engine is in uwho.c, and has a well-defined
+interface; it would be easy to incorporate uwho's functionality into
+mail clients or whois servers.
+.SH FILES
+uwho.ws \- list of whois servers
+.br
+uwho.ph \- list of ph servers
+.br
+uwho.dat \- list of all known servers
+.SH "SEE ALSO"
+whois \- TCP/IP Internet user name directory service
+.LP
+gopher, wais, prospero \- other front-ends for accessing information
+on the Internet.
+.LP
+Usenet newsgroups comp.mail.misc, alt.gopher, comp.infosystems.*,
+and the mailing list info-ph.
+.LP
+The many guides to the Internet, e.g. "Zen and the Art of the Internet",
+which is available for anonymous FTP from many sites.
+.SH BUGS
+KIS protocol lookups are implemented to do only MCI mail queries at the
+moment, although KIS could also be used to access X.500 directories.
+Also, they are arbitrarily slow. Use -t appropriately.
+.LP
+Country codes of ph servers are guessed from their domain addresses. 
+A country code is not given for MCI Mail (isn't it transnational?).
+.SH ACKNOWLEDGEMENTS
+This package would not exist if it weren't for Matt Power's awesome
+whois servers list.
+.SH AUTHORS
+Nye Liu (nyet@cco.caltech.edu)
+.br
+Dan Kegel (dank@blacks.jpl.nasa.gov, 818-354-0495)
+.SH DOCUMENTATION VERSION
+@(#)uwho.1	2.2 11/17/92

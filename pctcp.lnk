@@ -1,0 +1,9 @@
+uwho.obj main.obj pg.obj raw.obj mystring.obj,
+uwho,
+nul,
+ lpc.lib+
+ lnetlib.lib+
+ lsocket.lib+
+ llibce.lib+
+ oldnames.lib
+ nul.def

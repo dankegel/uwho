@@ -1,0 +1,181 @@
+(Install document version: %W% %G%)
+
+To install uwho on an MS-DOS system:
+1. Pick the makefile appropriate for your TCP/IP vendor:
+   i.e. one of
+	makefile.lwp
+	makefile.nfs
+	makefile.tcp
+	makefile.tk4
+2. Edit it to reflect where you want the uwho data files to go.
+3. Compile uwho using a Make utility, e.g.
+	nmake -f makefile.nfs
+4. Initialize uwho by typing:
+	uwho -update sipb.mit.edu nwu.edu
+   You should reinitialize it about every two weeks to keep its tables
+   up to date.  See the Unix example below for more details.
+5. Test uwho.  Type
+	uwho -list 
+   If it prints out a list of a hundred or so servers, all is well.
+
+MS-DOS bugs: 
+    uwho has hardly been tested on ms-dos at all.  
+    The port was provided by Stan Barber, bless his soul, but
+    I may have screwed up in merging his changes in to the mail distribution,
+    so beware.
+
+
+To install uwho on a VMS system:
+
+1. Edit vmsdef.h.
+1A. Select your TCP/IP vendor by uncommenting one of the lines:
+	/* #define MULTINET */
+	/* #define WOLLENGONG */
+	/* #define UCX */
+    Example:
+	#define MULTINET
+
+1B. Pick a disk and directory to save uwho's data files in by filling in:
+	#define UWHO_DIR ""
+    Example:
+	#define UWHO_DIR "dua0:[uwho]"
+
+2. compile uwho by executing the .COM file approprite for your TCP/IP vendor,
+   e.g. one of the three
+	@multinet.com
+	@wolleng.com
+	@ucx.com
+
+3. Define a symbol in the global symbol table as follows:
+	$uwho :== $disk:[directory]uwho -dir [directory]
+   where [directory] points to where you've chosen to store uwho's data files
+   (same as in step 1B above).
+
+4. Initialize uwho by typing:
+	uwho /update sipb.mit.edu nwu.edu
+   You should reinitialize it about every two weeks to keep its tables
+   up to date.  See the Unix example below for more details.
+
+5. Test uwho.  As a normal user, type
+	uwho /list 
+   If it prints out a list of a hundred or so servers, all is well.
+
+VMS bugs:
+    Options may be started with slashes, but multiple options can't
+    be combined in one word as is usual with VMS, i.e.
+	uwho /list/p
+    fails; you have to type
+	uwho /list /p
+    instead.
+    There is no online help file.
+    The current version supports output paging, but it doesn't work quite 
+    right yet; it seems to eat chars in interactive mode,
+    and add extra blank lines after blank output lines!
+
+
+To install uwho on a Unix system:
+
+1) Edit Makefile.
+1A) Select your computer's architecture by uncommenting the appropriate ARCH
+    definition line.  The default is
+    ARCH = -DUNIX -DSUNOS
+1B) Select a C compiler and options by editing the lines
+    CC = gcc
+    CFLAGS = -Wall -DANSI $(ARCH)	
+1C) Select destination directories for the executable, data, and manual files
+    by editing the lines
+    BIN = /usr/local/bin
+    ETC = /etc/local
+    MAN = /usr/local/man
+    # Select manual section and extension for the manual files.
+    MANSECT = 1
+    MANEXT = 1
+1D) Specify the default server hostname and protocol by setting DEF_HOST
+    to the hostname, and uncommenting one of the DEF_HOST_PROTOCOL lines:
+    DEF_HOST = horton
+    #DEF_HOST_PROTOCOL = uwho_PROTO_PH
+    DEF_HOST_PROTOCOL = uwho_PROTO_WHOIS
+1E) Pick an output pager by uncommenting its three macros PAGER, PAGER_OBJ,
+    and PAGER_H.
+    If you're running this under Unix, POPEN_PAGER is preferred; otherwise, 
+    DUMB_PAGER is ok; if that doesn't work, use NO_PAGER.
+
+    e.g. under Unix,
+
+    PAGER = POPEN_PAGER
+    PAGER_OBJ = 
+    PAGER_H = 
+
+    #PAGER = DUMB_PAGER
+    #PAGER_OBJ = pg.o raw.o
+    #PAGER_H = pg.h
+
+    #PAGER = NO_PAGER
+    #PAGER_OBJ = 
+    #PAGER_H =
+
+2) Type 'make'.  Uwho should compile with no errors.
+   Become the superuser (or whatever pseudouser will own the uwho data files),
+   and type 'make install'.  This installs the executable,
+   creates the data directory if needed, downloads initial server lists,
+   and installs manual pages.
+   Note: if you don't want to run 'make install', you'll have to run
+   uwho -update, e.g. 'uwho -update sipb.mit.edu nwu.edu', manually.
+
+3) Select nearby whois and ph servers to periodically download server lists
+   from.
+   If your local whois or ph server supports the 'whois-servers' 
+   or 'ns-servers' queries, respectively, you should use them as your
+   list servers.
+   Otherwise, get an up to date list of whois list servers with the query
+	whois -h sipb.mit.edu whois-list-servers
+   and choose the closest host in the list for your master server;
+   similarly, choose a close ph server that supports the ph-servers query.
+   There is no ns-list-servers query, but as of this writing, the following 
+   hosts have an up-to-date ns-servers record:
+    ns.vtt.fi, ns.cs.hut.fi, ns.uiuc.edu, whois.uoregon.edu,
+    prism.uchicago.edu, ns.bgu.edu, ns.nwu.edu
+
+   Add a line like
+	MM HH DD,DD * * /BIN/uwho -update WHOIS_SERVER PH_SERVER >/dev/console 2>&1
+	where MM, HH, and DD,DD are when to run uwho -update,
+	      /BIN is the value chosen for BIN in Makefile,
+	      WHOIS_SERVER is the whois server chosen above, and
+	      PH_SERVER is the ph server chosen above,
+   to crontab (under SunOS 4.x, use 'crontab -e') to update uwho's database 
+   roughly twice monthly.  
+   (It's a good idea to at first set the crontab entry to execute
+    two minutes from now today, and make sure it works, before
+    setting it to run every two weeks.)
+
+4) If your organization has a whois or ns server that can be accessed 
+   from outside, but is not already listed by uwho -list, 
+   send your organization's name and the hostname of its whois and ns
+   servers to mhpower@athena.mit.edu (who maintains a list of whois servers)
+   and to j-norstad@nwu.edu (who maintains a list of ns servers).
+   These are the lists that are downloaded by uwho -update.
+
+   If you're interested in talking to ph/ns administrators, the mailing 
+   list info-ph may be of interest; to subscribe, write 
+   to info-ph-request@uxc.cso.uiuc.edu.
+   (There is no mailing list for whois administrators that I know of.)
+
+5) If you'd like to use uwho as a meta-whois server, add the line
+    whois 	stream 	tcp 	nowait 	nobody 	/BIN/uwho uwho -whoisd
+   to /etc/inetd.conf, and restart inetd (or send it a HUP signal, if your
+   inetd is polite).
+   Be sure that the DEF_HOST and DEF_HOST_PROTOCOL chosen in Makefile do 
+   not refer back to this server, or you'll have an infinite loop on your hands!
+
+   This is the easiest way to make uwho available to a large number of people.
+
+
+TROUBLESHOOTING
+
+If uwho prints
+    database file uwho.dat unreadable or non-existent; 
+    was this software installed properly?
+the first time you run it, it's complaining that you haven't run
+'uwho -update whoishost phhost' yet.  This is normally run first when 
+you type 'make install', but some people accidentally skip that step of
+the above procedure.

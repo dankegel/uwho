@@ -1,0 +1,7 @@
+uwho.obj main.obj pg.obj raw.obj mystring.obj lprotrtn.obj lyp_rtns.obj,
+uwho,
+nul,
+ llibtk.lib+
+ llibce.lib+
+ oldnames.lib
+ nul.def
