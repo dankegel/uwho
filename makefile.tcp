@@ -1,0 +1,54 @@
+# Make for Microsoft C 7.0 and PC/TCP Toolkit 2.05
+# Stan Barber, Baylor College of Medicine (sob@bcm.tmc.edu)
+# Last change 12/21/92
+# Please setup the INCLUDE and LIBS environmental variables correctly to
+# find the Toolkit include files and the pccurses include files
+#
+ETC = C:/FTP
+DEF_HOST = academ
+DEF_HOST_PROTOCOL = uwho_PROTO_WHOIS
+
+PAGER = DUMB_PAGER
+PAGER_OBJ = pg.obj raw.obj
+PAGER_H = pg.h
+
+
+MACHDEFS = /DPCTCP
+
+CC = cl
+CFLAGS =   /AL  /c
+#CFLAGS = /AL /Gsy /Os  /c
+#CFLAGS = /AL /Zi /Od /c
+
+
+.C.OBJ:
+	cl $(CFLAGS) $(MACHDEFS) $*.c
+
+uwho.exe: main.obj uwho.obj mystring.obj $(PAGER_OBJ)
+	link /F /PACKC /NOI /ST:8192 /SEG:256 /NOD @pctcp.lnk 
+
+uwho.obj: uwho.c tcpip.h uwho.h mystring.h
+
+raw.obj: raw.c raw.h
+
+pg.obj: pg.c pg.h
+
+mystring.obj: mystring.c mystring.h
+
+main.obj: main.c uwho.h tcpip.h mystring.h $(PAGER_H)
+	$(CC) $(CFLAGS) $(MACHDEFS) \
+	/D$(PAGER) \
+	/DUWHO_DIR=\"$(ETC)\"   \
+	/DDEF_HOST=\"$(DEF_HOST)\"      \
+	/DDEF_HOST_PROTOCOL=$(DEF_HOST_PROTOCOL)        \
+	main.c
+
+
+clean:
+	del main.obj
+	del uwho.obj
+	del pg.obj
+	del raw.obj
+	del mystring.obj
+	del uwho.exe
+
